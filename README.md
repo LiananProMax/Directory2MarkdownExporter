@@ -10,13 +10,23 @@
 - 🔀 命令行参数优先于配置文件
 - ⚠️ 自动跳过二进制文件
 - 🖥️ 支持Windows/macOS/Linux
+
 ## 快速开始
 ### 安装依赖
 ```bash
 pip install python-dotenv
 ```
-
-
+### 基础使用
+```bash
+python exporter.py [输入目录] [输出文件.md]
+```
+### 示例命令
+```bash
+# 扫描当前目录，生成到output.md
+python exporter.py . output.md
+# 指定项目目录和输出路径
+python exporter.py ~/projects/my_project docs/STRUCTURE.md
+```
 ## 高级配置
 ### 配置文件`.env`
 ```ini
@@ -31,6 +41,11 @@ EXCLUDE_EXTENSIONS=.log, .tmp, .exe
 |-------------|-------------------------------|-------------|
 | `input_dir` | 要扫描的目录路径              | .env中配置  |
 | `output_file` | 生成的Markdown文件路径       | .env中配置  |
+
+```bash
+# 在.env中配置好参数后直接运行
+python script.py
+```
 ### 排除规则
 - **目录排除**：精确匹配目录名称（如`.git`）
 - **文件排除**：精确匹配文件名（如`secret.key`）
