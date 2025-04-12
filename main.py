@@ -1,5 +1,6 @@
 import os
 import argparse
+import fnmatch
 from collections import deque
 from dotenv import load_dotenv
 
@@ -52,11 +53,11 @@ def generate_directory_tree(root_dir, exclude_dirs, exclude_files, exclude_exts)
                 entry_path = os.path.join(current_path, e)
                 is_dir = os.path.isdir(entry_path)
                 # 排除目录
-                if is_dir and e in exclude_dirs:
+                if is_dir and any(fnmatch.fnmatch(e, pattern) for pattern in exclude_dirs):
                     continue
                 # 排除文件和扩展名
                 if not is_dir:
-                    if e in exclude_files:
+                    if any(fnmatch.fnmatch(e, pattern) for pattern in exclude_files):
                         continue
                     ext = os.path.splitext(e)[1]
                     if ext in exclude_exts:
@@ -90,11 +91,12 @@ def process_directory(input_dir, output_file, exclude_dirs, exclude_files, exclu
         # 处理文件内容
         file_entries = []
         for root, dirs, files in os.walk(input_dir):
-            # 应用目录排除规则
-            dirs[:] = [d for d in dirs if d not in exclude_dirs]
+            # 应用目录排除规则（支持通配符）
+            dirs[:] = [d for d in dirs if not any(fnmatch.fnmatch(d, pattern) for pattern in exclude_dirs)]
+            
             for filename in files:
-                # 应用文件和扩展名排除规则
-                if filename in exclude_files:
+                # 应用文件和扩展名排除规则（支持通配符）
+                if any(fnmatch.fnmatch(filename, pattern) for pattern in exclude_files):
                     continue
                 ext = os.path.splitext(filename)[1]
                 if ext in exclude_exts:
@@ -132,7 +134,7 @@ if __name__ == "__main__":
                         default=os.getenv('OUTPUT_FILE'), 
                         help="输出的Markdown文件路径（可在.env中设置OUTPUT_FILE）")
     
-    # 解析排除规则
+    # 解析排除规则（支持通配符）
     exclude_dirs = [d.strip() for d in os.getenv('EXCLUDE_DIRS', '').split(',') if d.strip()]
     exclude_files = [f.strip() for f in os.getenv('EXCLUDE_FILES', '').split(',') if f.strip()]
     exclude_exts = [e.strip() for e in os.getenv('EXCLUDE_EXTENSIONS', '').split(',') if e.strip()]
